@@ -1,39 +1,41 @@
-name: "Frogbot General Scan"
+name: "Frogbot Pull Request Scan"
 on:
-  push:
-    branches: ["**"]        # Trigger on every push to every branch
   pull_request_target:
     types: [opened, synchronize]
 
 permissions:
-  pull-requests: write
-  contents: read
+  pull-requests: write # Required to post comments on the PR
+  contents: read       # Required to scan the code
 
 jobs:
-  frogbot-scan:
+  frogbot-pr-scan:
     runs-on: ubuntu-latest
     environment: frogbot
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0    # Ensures all branches/refs are available
+          # For pull_request_target, we checkout the PR head (the source branch)
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
-      - name: Run Frogbot
+      - name: Run Frogbot PR Scan
         uses: jfrog/frogbot@v2
         env:
           # Connection Details
           JF_URL: ${{ secrets.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
           JF_GIT_TOKEN: ${{ secrets.JF_GIT_TOKEN }}
+          
+          # Project Configuration
           JF_WORKING_DIR: "npm-example"
           JF_WATCHES: "sss-servicenow"
           
-          # Branch Configuration
-          # This variable tells Frogbot to scan the branch that triggered the action
-          JF_GIT_BASE_BRANCH: ${{ github.ref_name }} 
+          # Pull Request Logic
+          # This tells Frogbot which branch we are merging INTO (e.g., main)
+          JF_GIT_BASE_BRANCH: ${{ github.base_ref }}
           
           # Scan Settings
           JFROG_CLI_LOG_LEVEL: DEBUG
           JF_INCLUDE_ALL_VULNERABILITIES: "TRUE"
-          JF_FAIL: "FALSE"
+          JF_FAIL: "FALSE" # Set to TRUE if you want to block PRs with vulnerabilities
