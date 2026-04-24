@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0    # Ensures all branches/refs are available
+          fetch-depth: 0    # Ensures all branches/refs are available.
 
       - name: Run Frogbot
         uses: jfrog/frogbot@v2
