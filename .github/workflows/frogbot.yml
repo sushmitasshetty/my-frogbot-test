@@ -1,38 +1,78 @@
+# name: "Frogbot General Scan"
+# on:
+#   push:
+#     branches: ["main"]      # Usually best to target your primary branch
+#   pull_request_target:
+#     types: [opened, synchronize]
+
+# permissions:
+#   pull-requests: write
+#   contents: write           # Changed to write for fix PRs
+#   security-events: write    # For the Security Tab results
+
+# jobs:
+#   frogbot-scan:
+#     runs-on: ubuntu-latest
+#     environment: frogbot
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#         with:
+#           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+#           fetch-depth: 0
+
+#       - name: Run Frogbot
+#         uses: jfrog/frogbot@v2
+#         env:
+#           JF_URL: ${{ secrets.JF_URL }}
+#           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+#           JF_GIT_TOKEN: ${{ secrets.JF_GIT_TOKEN }}
+#           JF_WORKING_DIR: "npm-example"
+#           JF_WATCHES: "sss-servicenow"
+          
+#           # Tell Frogbot which branch we are scanning
+#           JF_GIT_BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref_name }}
+          
+#           JFROG_CLI_LOG_LEVEL: DEBUG
+#           JF_INCLUDE_ALL_VULNERABILITIES: "TRUE"
+#           JF_FAIL: "FALSE"
+
+
+
+
 name: "Frogbot General Scan"
 on:
   push:
-    branches: ["main"]      # Usually best to target your primary branch
+    branches: ["main"]
   pull_request_target:
     types: [opened, synchronize]
 
 permissions:
   pull-requests: write
-  contents: write           # Changed to write for fix PRs
-  security-events: write    # For the Security Tab results
+  contents: write
+  security-events: write
 
 jobs:
   frogbot-scan:
     runs-on: ubuntu-latest
     environment: frogbot
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 0
+      # ❌ DELETE THIS ENTIRE STEP
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
+      #   with:
+      #     ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      #     fetch-depth: 0
 
       - name: Run Frogbot
         uses: jfrog/frogbot@v2
         env:
           JF_URL: ${{ secrets.JF_URL }}
           JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-          JF_GIT_TOKEN: ${{ secrets.JF_GIT_TOKEN }}
+          JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # ✅ GITHUB_TOKEN works now
           JF_WORKING_DIR: "npm-example"
           JF_WATCHES: "sss-servicenow"
-          
-          # Tell Frogbot which branch we are scanning
           JF_GIT_BASE_BRANCH: ${{ github.event.pull_request.base.ref || github.ref_name }}
-          
           JFROG_CLI_LOG_LEVEL: DEBUG
           JF_INCLUDE_ALL_VULNERABILITIES: "TRUE"
           JF_FAIL: "FALSE"
